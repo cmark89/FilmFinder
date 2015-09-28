@@ -2,4 +2,6 @@
     <string name="app_name">FilmFinder</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_movie_detail">Movie Details</string>
+    <string name="intent_extra_id_key">MOVIE_ID</string>
 </resources>
