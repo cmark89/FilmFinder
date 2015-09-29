@@ -1,0 +1,17 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_sort_type_key">PREF_SORT_TYPE_KEY</string>
+    <string name="pref_sort_type_title">Sort Type</string>
+    <string name="pref_sort_type_description">The method used to filter movie results.</string>
+    <string-array name="pref_sort_type_list_titles">
+        <item>Popularity</item>
+        <item>Rating</item>
+    </string-array>
+    <string-array name="pref_sort_type_list_values">
+        <item>popularity.desc</item>
+        <item>vote_average.desc</item>
+    </string-array>
+    <string name="pref_sort_type_default">vote_average.desc</string>
+</resources>
