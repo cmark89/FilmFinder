@@ -77,7 +77,6 @@ public class MainActivityFragment extends Fragment {
     {
         final String LOG_TAG = "FetchMovieTask";
         final String BASE_URL = "https://api.themoviedb.org/3/";
-        final String API_KEY = "ba60e393c00559c4e8ed4aae77dcd7cb";
         final int MIN_VOTES = 35;
 
         @Override
@@ -106,7 +105,7 @@ public class MainActivityFragment extends Fragment {
             uriBuilder.appendQueryParameter("sort_by", PreferenceManager.getDefaultSharedPreferences(getContext()).
                     getString(getString(R.string.pref_sort_type_key), getString(R.string.pref_sort_type_default)));
             uriBuilder.appendQueryParameter("vote_count.gte", ""+MIN_VOTES);
-            uriBuilder.appendQueryParameter("api_key", API_KEY);
+            uriBuilder.appendQueryParameter("api_key", Globals.API_KEY);
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
