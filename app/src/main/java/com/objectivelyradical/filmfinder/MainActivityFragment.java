@@ -1,6 +1,9 @@
 package com.objectivelyradical.filmfinder;
 
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -15,6 +18,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.objectivelyradical.filmfinder.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -71,6 +75,11 @@ public class MainActivityFragment extends Fragment {
 
         // when the fragment starts, update the list of movies
         updateMovieList();
+
+        // Run an empty query against the content provider to verify that it works
+        Cursor c = getContext().getContentResolver().query(MovieContract.getMovieUri(), null, null, null, null);
+        Log.d(LOG_TAG, "Content Provider query returned " + c.getCount() + " rows.");
+        c.close();
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, Movie[]>

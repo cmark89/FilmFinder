@@ -82,6 +82,8 @@ public class Movie implements Parcelable {
         dest.writeFloat(rating);
     }
 
+
+
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
 
         @Override

@@ -33,6 +33,8 @@ public class MovieDetailActivityFragment extends Fragment {
         Picasso.with(getContext()).load(movie.getFullPosterPath()).into((ImageView) rootView
                 .findViewById(R.id.movie_detail_poster));
 
+        // Here we need to tell the data manager to query the reviews and videos.
+
         return rootView;
     }
 }

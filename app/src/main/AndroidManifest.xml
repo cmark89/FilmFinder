@@ -3,7 +3,6 @@
     package="com.objectivelyradical.filmfinder" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/icon"
@@ -30,6 +29,14 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+
+        <provider
+            android:authorities="com.objectivelyradical.filmfinder"
+            android:name="com.objectivelyradical.filmfinder.data.FavoriteMovieProvider"
+            android:enabled="true"
+            android:exported="false"
+            android:syncable="false"
+            />
     </application>
 
 </manifest>
