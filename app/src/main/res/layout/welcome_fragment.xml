@@ -8,7 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Welcome to FilmFinder!"
+        android:text="@string/welcome_fragment_header"
         android:layout_weight=".5"
         android:gravity="fill_vertical" />
 
@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Discover new films! Share your discoveries! BECOME THE MOVIE!"
+        android:text="@string/welcome_fragment_text"
         android:layout_weight="1"
         android:gravity="center_horizontal" />
 </LinearLayout>

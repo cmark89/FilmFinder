@@ -5,5 +5,5 @@ package com.objectivelyradical.filmfinder;
  */
 public class Globals {
     // Change this value to a valid API key for themoviedb
-    public static String API_KEY = "XXXXXXXXXXXXXXXXXXX";
+    public static String API_KEY = "XXXXXXXXXXXXXX";
 }

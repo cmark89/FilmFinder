@@ -199,8 +199,6 @@ public class MovieDetailFragment extends Fragment implements MovieDataHandler.De
                 TextView view = (TextView)newView.findViewById(R.id.trailer_list_title);
                 view.setText(t.getTitle());
 
-                //view.setOnClickListener();
-                ImageView imageView = (ImageView)newView.findViewById(R.id.trailer_list_play_icon);
                 newView.setOnClickListener(new View.OnClickListener() {
                     String mUrl = "http://youtube.com/watch?v=" + t.getLink();
                     @Override
@@ -233,8 +231,6 @@ public class MovieDetailFragment extends Fragment implements MovieDataHandler.De
 
                 // Set the callback for the button
                 if(r.isLongText()) {
-                    ImageView imageView = (ImageView) newView.findViewById(R.id.review_item_open);
-                    TextView readMore = (TextView) newView.findViewById(R.id.review_item_read_more_text);
                     View.OnClickListener listener = new View.OnClickListener() {
                         String mUrl = r.getUrl();
 
@@ -247,7 +243,7 @@ public class MovieDetailFragment extends Fragment implements MovieDataHandler.De
                     };
                     newView.setOnClickListener(listener);
                 } else {
-                    ((View)newView.findViewById(R.id.review_item_read_more)).setVisibility(View.INVISIBLE);
+                    newView.findViewById(R.id.review_item_read_more).setVisibility(View.INVISIBLE);
                 }
                 layout.addView(newView);
             }
@@ -255,25 +251,5 @@ public class MovieDetailFragment extends Fragment implements MovieDataHandler.De
             layout.setVisibility(View.INVISIBLE);
             mRootView.findViewById(R.id.detail_review_text).setVisibility(View.INVISIBLE);
         }
-    }
-
-    // Workaround for using a list view inside a scroll view:
-    //
-    public static void setListViewHeight(ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null) {
-            return;
-        }
-        int totalHeight = 0;
-        int length = listAdapter.getCount();
-        for (int i = 0; i < length; i++) {
-            View v = listAdapter.getView(i, null, listView);
-            v.measure(0, 0);
-            totalHeight += v.getMeasuredHeight();
-        }
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() *
-                (listAdapter.getCount() - 1));
-        listView.setLayoutParams(params);
     }
 }

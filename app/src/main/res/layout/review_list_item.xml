@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="12dp"
-        android:text="The first thing Spinneretta was aware of after regaining consciousness was gravity hurling her toward the ground. She opened her eyes just in time to see the pebble-strewn ground approaching. Tangled sets of sharp, obelisk-like stones – just like those she had seen in the excavation pit – were racing toward her. She panicked and braced herself, crossing her arms and legs over her head and preparing for impact. There was a sharp lancing pain in her arm, a nauseous sensation of something tearing, and then she tumbled to the stone-covered ground." />
+        android:text="" />
 
     <LinearLayout
         android:orientation="horizontal"

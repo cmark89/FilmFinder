@@ -39,8 +39,6 @@ public class MainActivityFragment extends Fragment implements MovieDataHandler.M
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
-       // ImageView imageView = (ImageView)rootView.findViewById(R.id.movies_image_view);
-        //Picasso.with(getActivity()).load("http://i.imgur.com/DvpvklR.png").into(imageView);
         adapter = new MovieAdapter(getContext(), new ArrayList<Movie>());
         mProgress = new ProgressDialog(getContext());
         mProgress.setTitle(getString(R.string.loading_title));
@@ -127,7 +125,7 @@ public class MainActivityFragment extends Fragment implements MovieDataHandler.M
     }
 
     public interface Callback {
-        public void onMovieSelected(Movie m, int i);
+        void onMovieSelected(Movie m, int i);
     }
 
 
