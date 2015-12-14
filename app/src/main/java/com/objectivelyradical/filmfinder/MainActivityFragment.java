@@ -1,11 +1,10 @@
 package com.objectivelyradical.filmfinder;
 
-import android.content.ContentProvider;
-import android.content.ContentResolver;
-import android.content.Intent;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -15,29 +14,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.objectivelyradical.filmfinder.data.MovieContract;
-import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment implements MovieDataHandler.MovieLoadCallback {
     final String LOG_TAG = "MAIN_ACTIVITY_FRAGMENT";
+    final String MOVIE_LIST_KEY = "MOVIE_LIST";
+    final String SORT_METHOD_KEY = "SORT_METHOD";
+    ProgressDialog mProgress;
     MovieAdapter adapter;
+    ArrayList<Movie> mMovieList;
+    String mLastSortMethod = "";
     public MainActivityFragment() {
     }
 
@@ -48,33 +42,61 @@ public class MainActivityFragment extends Fragment {
        // ImageView imageView = (ImageView)rootView.findViewById(R.id.movies_image_view);
         //Picasso.with(getActivity()).load("http://i.imgur.com/DvpvklR.png").into(imageView);
         adapter = new MovieAdapter(getContext(), new ArrayList<Movie>());
+        mProgress = new ProgressDialog(getContext());
+        mProgress.setTitle(getString(R.string.loading_title));
+        mProgress.setMessage(getString(R.string.loading_message));
+
+
         GridView gridView = (GridView)rootView.findViewById(R.id.movie_list_view);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie movie = (Movie) parent.getItemAtPosition(position);
-
-                Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
-                intent.putExtra(getString(R.string.intent_parcelable_key), movie);
-                startActivity(intent);
+                ((Callback) getActivity()).onMovieSelected(movie, position);
             }
         });
-
+        if(savedInstanceState != null) {
+            mLastSortMethod = savedInstanceState.getString(SORT_METHOD_KEY);
+            mMovieList = (ArrayList<Movie>)savedInstanceState.get(MOVIE_LIST_KEY);
+            populateMovieList();
+        }
         return rootView;
     }
 
-    private void updateMovieList() {
-        FetchMovieTask task = new FetchMovieTask();
-        task.execute();
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Check if the preferred sort method has changed
+        // if it hasn't changed, we don't need to requery the movies
+        String sortMethod = PreferenceManager.getDefaultSharedPreferences(getContext())
+                .getString(getContext().getString(R.string.pref_sort_type_key),
+                        getContext().getString(R.string.pref_sort_type_default));
+        if(!sortMethod.equals(mLastSortMethod)) {
+            loadMovies();
+        }
+        mLastSortMethod = sortMethod;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mMovieList != null) {
+            outState.putParcelableArrayList(MOVIE_LIST_KEY, mMovieList);
+        }
+        outState.putString(SORT_METHOD_KEY, mLastSortMethod);
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        // when the fragment starts, update the list of movies
-        updateMovieList();
+        // When the fragment starts, load the list of movies if we don't have any yet
+        // Otherwise, restore the previous list
+        if(mMovieList == null) {
+            loadMovies();
+        }
 
         // Run an empty query against the content provider to verify that it works
         Cursor c = getContext().getContentResolver().query(MovieContract.getMovieUri(), null, null, null, null);
@@ -82,112 +104,39 @@ public class MainActivityFragment extends Fragment {
         c.close();
     }
 
-    public class FetchMovieTask extends AsyncTask<String, Void, Movie[]>
-    {
-        final String LOG_TAG = "FetchMovieTask";
-        final String BASE_URL = "https://api.themoviedb.org/3/";
-        final int MIN_VOTES = 35;
+    public void loadMovies() {
+        mProgress.show();
+        MovieDataHandler handler = new MovieDataHandler();
+        handler.getMovies(getContext(), this, networkAvailable());
+    }
 
-        @Override
-        protected void onPostExecute(Movie[] movies) {
-            if(movies.length > 0) {
-                // Do something with the returned movie data
-                for (int i = 0; i < movies.length; i++) {
-                    Log.d(LOG_TAG, movies[i].getTitle() + " ... " + movies[i].getId());
-                }
+    private void populateMovieList() {
+        mProgress.dismiss();
+        adapter.clear();
+        adapter.addAll(mMovieList);
+    }
 
-                updateMovieGrid(movies);
-            }
+    public void onMovieLoadComplete(Movie[] movies) {
+        if(movies.length > 0) {
+            mMovieList = new ArrayList<Movie>(Arrays.asList(movies));
+        } else {
+            mMovieList = null;
         }
 
-        // Don't update this in the UI thread, because it blocks input while the posters are being loaded
-        private void updateMovieGrid(Movie[] movies) {
-            adapter.clear();
-            adapter.addAll(movies);
-        }
+        populateMovieList();
+    }
 
-        @Override
-        protected Movie[] doInBackground(String... params) {
-            Uri.Builder uriBuilder = Uri.parse(BASE_URL).buildUpon();
-            uriBuilder.appendPath("discover");
-            uriBuilder.appendPath("movie");
-            uriBuilder.appendQueryParameter("sort_by", PreferenceManager.getDefaultSharedPreferences(getContext()).
-                    getString(getString(R.string.pref_sort_type_key), getString(R.string.pref_sort_type_default)));
-            uriBuilder.appendQueryParameter("vote_count.gte", ""+MIN_VOTES);
-            uriBuilder.appendQueryParameter("api_key", Globals.API_KEY);
+    public interface Callback {
+        public void onMovieSelected(Movie m, int i);
+    }
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String jsonResponse = null;
 
-            try {
-                URL url = new URL(uriBuilder.toString());
-                urlConnection = (HttpURLConnection)url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
 
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if(inputStream == null) {
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if(buffer.length() == 0) {
-                    return null;
-                }
-
-                jsonResponse = buffer.toString();
-            } catch (Exception exception) {
-                Log.e(LOG_TAG, exception.toString());
-            } finally {
-                if(urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if(reader != null) {
-                    try {
-                        reader.close();
-                    } catch(final Exception e) {
-                        Log.e(LOG_TAG, e.toString());
-                    }
-                }
-            }
-
-            try {
-                return parseJson(jsonResponse);
-            } catch (Exception e) {
-                Log.e(LOG_TAG, e.toString());
-            }
-            return null;
-        }
-
-        private Movie[] parseJson(String jsonString) throws JSONException {
-
-            JSONObject root = new JSONObject (jsonString);
-            JSONArray results = root.getJSONArray("results");
-            Movie[] movies = new Movie[results.length()];
-            String title;
-            String posterPath;
-            int id;
-            String releaseDate;
-            String summary;
-            float rating;
-            for(int i = 0; i < results.length(); i++) {
-                JSONObject movie = results.getJSONObject(i);
-                title = movie.getString("original_title");
-                posterPath = movie.getString("poster_path");
-                id = movie.getInt("id");
-                releaseDate = movie.getString("release_date");
-                summary = movie.getString("overview");
-                rating = (float)movie.getDouble("vote_average");
-
-                movies[i] = new Movie(title, posterPath, id, releaseDate, summary, rating);
-            }
-            return movies;
-        }
+    // based on stack overflow snippet from previous code review
+    public boolean networkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager)getActivity()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

@@ -90,8 +90,14 @@ public class FavoriteMovieProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        if(mUriMatcher.match(uri) == URI_TYPE_MOVIE) {
-            return mDbHelper.getWritableDatabase().delete(MovieContract.TABLE_NAME, selection, selectionArgs);
+        switch(mUriMatcher.match(uri)) {
+            case(URI_TYPE_MOVIE): {
+                return mDbHelper.getWritableDatabase().delete(MovieContract.TABLE_NAME, selection, selectionArgs);
+            }
+            case(URI_TYPE_MOVIE_ID): {
+                return mDbHelper.getWritableDatabase().delete(MovieContract.TABLE_NAME,
+                        MovieContract.COLUMN_MOVIE_ID + " = ?", new String[] { MovieContract.getIdFromUri(uri) });
+            }
         }
         return 0;
     }

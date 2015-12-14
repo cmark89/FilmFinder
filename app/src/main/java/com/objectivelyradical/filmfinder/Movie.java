@@ -1,7 +1,11 @@
 package com.objectivelyradical.filmfinder;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.objectivelyradical.filmfinder.data.MovieContract;
 
 import java.text.DecimalFormat;
 
@@ -46,6 +50,11 @@ public class Movie implements Parcelable {
     public String getRating() {
         DecimalFormat df = new DecimalFormat("#.00");
         return df.format(rating);
+    }
+
+    public boolean isFavorite(Context context) {
+        Cursor c = context.getContentResolver().query(MovieContract.getMovieUri(id), null, null, null, null);
+        return c.moveToFirst();
     }
 
     public Movie(String title, String posterPath, int id, String releaseDate,

@@ -8,10 +8,13 @@
     <string-array name="pref_sort_type_list_titles">
         <item>Popularity</item>
         <item>Rating</item>
+        <item>Favorites</item>
     </string-array>
     <string-array name="pref_sort_type_list_values">
         <item>popularity.desc</item>
         <item>vote_average.desc</item>
+        <item>@string/pref_sort_type_favorites</item>
     </string-array>
     <string name="pref_sort_type_default">vote_average.desc</string>
+    <string name="pref_sort_type_favorites">favorites</string>
 </resources>
